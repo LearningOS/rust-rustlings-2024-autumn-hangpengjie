@@ -3,10 +3,46 @@
 	This problem requires you to implement a sorting algorithm
 	you can use bubble sorting, insertion sorting, heap sorting, etc.
 */
-// I AM NOT DONE
 
-fn sort<T>(array: &mut [T]){
+
+fn sort<T: std::cmp::PartialOrd>(array: &mut [T]){
 	//TODO
+    fn q_sort<T: std::cmp::PartialOrd>(array: &mut [T], left: usize, right: usize) -> usize {
+        if  left < right {
+            //let pivot = &array[left];
+            let mut i = left;
+            let mut j = right;
+            while i < j {
+                while i < j && array[j] >= array[i] {
+                    j -= 1;
+                }
+                if i < j{
+                    array.swap(i, j);   
+                }
+                while i < j && array[i] < array[j] {
+                    i += 1;
+                }
+                if i < j{
+                    array.swap(i, j);
+                }
+            }
+            return i;
+        }
+        return left;
+    }
+    fn q_sort_recursive<T: std::cmp::PartialOrd>(array: &mut [T], left: usize, right: usize) {
+        if left < right {
+            let mid = q_sort(array, left, right);
+            // 这里一定要比较一下 否则mid:usize可能溢出
+            if left < mid {
+                q_sort_recursive(array, left, mid - 1);
+            }
+            if mid + 1 < right {
+                q_sort_recursive(array, mid + 1, right);
+            }
+        }
+    }
+    q_sort_recursive(array, 0, array.len() - 1);
 }
 #[cfg(test)]
 mod tests {

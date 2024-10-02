@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +29,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T:std::cmp::PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T:std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -72,11 +72,56 @@ impl<T> LinkedList<T> {
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
+        let mut res = Self{
             length: 0,
             start: None,
             end: None,
+        };
+        if list_a.length == 0 && list_b.length == 0{
+            return res;
         }
+        
+        let mut ptr_a = match list_a.start{
+            None => return list_b,
+            Some(ptr) => ptr.as_ptr(),
+        };
+        let mut ptr_b = match list_b.start{
+            None => return list_a,
+            Some(ptr) => ptr.as_ptr(),
+        };
+        while !ptr_a.is_null() && !ptr_b.is_null() {
+			let a_val = unsafe { (*ptr_a).val.clone() };
+            let b_val = unsafe { (*ptr_b).val.clone() };
+			if a_val <= b_val {
+                res.add(a_val);
+				ptr_a = match unsafe {(*ptr_a).next}{
+                    Some(ptr) => ptr.as_ptr(),
+                    None => std::ptr::null_mut(),
+                };
+            }else{
+                res.add(b_val);
+                ptr_b = match unsafe {(*ptr_b).next}{
+                    Some(ptr) => unsafe {ptr.as_ptr()},
+                    None => std::ptr::null_mut(),
+                };
+                
+			}
+		}
+        while !ptr_a.is_null(){
+            res.add(unsafe {(*ptr_a).val.clone()});
+            ptr_a = match unsafe {(*ptr_a).next}{
+                Some(ptr) => unsafe {ptr.as_ptr()},
+                None => std::ptr::null_mut(),
+            };
+        }
+        while !ptr_b.is_null(){
+            res.add(unsafe {(*ptr_b).val.clone()});
+            ptr_b = match unsafe {(*ptr_b).next}{
+                Some(ptr) => unsafe {ptr.as_ptr()},
+                None => std::ptr::null_mut(),
+            }
+        }
+		return res;
 	}
 }
 
